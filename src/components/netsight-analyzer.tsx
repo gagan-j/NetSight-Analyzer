@@ -114,11 +114,18 @@ export default function NetSightAnalyzer() {
         return;
       }
 
+      // Temporarily apply a grayscale filter for the PDF
+      reportElement.style.filter = 'grayscale(100%)';
+      
       try {
         const canvas = await html2canvas(reportElement, {
-          backgroundColor: null, // Use transparent background
+          backgroundColor: '#ffffff', // Use solid white for B&W
           scale: 2,
         });
+        
+        // Remove the filter after capturing
+        reportElement.style.filter = '';
+
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF({
           orientation: 'portrait',
@@ -129,9 +136,11 @@ export default function NetSightAnalyzer() {
         pdf.save(`netsight_report_${new Date().toISOString()}.pdf`);
         toast({
           title: 'Report Downloaded',
-          description: 'Your PDF report has been successfully generated.',
+          description: 'Your black and white PDF report has been successfully generated.',
         });
       } catch (error) {
+        // Ensure the filter is removed even if an error occurs
+        reportElement.style.filter = '';
         toast({
           variant: 'destructive',
           title: 'PDF Generation Failed',
