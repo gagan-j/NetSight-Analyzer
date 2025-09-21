@@ -278,7 +278,7 @@ export default function NetSightAnalyzer() {
                 </Card>
             ))}
         </div>
-        <Card className={cn(cardClassName, 'h-[300px]')}>
+        <Card className={cn(cardClassName, 'h-[300px] rounded-3xl')}>
           <CardHeader>
             <CardTitle className="text-lg">Signal Strength vs. Distance</CardTitle>
           </CardHeader>
@@ -287,21 +287,21 @@ export default function NetSightAnalyzer() {
                <AreaChart data={chartData.signalVsDistance}>
                   <defs>
                     <linearGradient id="colorSignal" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(150 50% 70%)" stopOpacity={0.6}/>
-                      <stop offset="95%" stopColor="hsl(150 50% 70%)" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="hsl(95 40% 70%)" stopOpacity={0.6}/>
+                      <stop offset="95%" stopColor="hsl(95 40% 70%)" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
                   <XAxis dataKey="x" stroke="hsl(var(--foreground))" fontSize={12} unit="m" />
                   <YAxis stroke="hsl(var(--foreground))" fontSize={12} unit="dBm" domain={[-120, -30]}/>
                   <Tooltip content={<CustomTooltip />} />
-                  <Area type="monotone" dataKey="y" name="Signal" stroke="hsl(150 50% 80%)" fill="url(#colorSignal)" />
+                  <Area type="monotone" dataKey="y" name="Signal" stroke="hsl(95 40% 80%)" fill="url(#colorSignal)" />
                 </AreaChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className={cn(cardClassName, 'h-[300px]')}>
+          <Card className={cn(cardClassName, 'h-[300px] rounded-3xl')}>
             <CardHeader><CardTitle className="text-lg">BER vs. SNR</CardTitle></CardHeader>
              <CardContent className="h-[220px] -ml-6">
               <ResponsiveContainer width="100%" height="100%">
@@ -315,7 +315,7 @@ export default function NetSightAnalyzer() {
               </ResponsiveContainer>
             </CardContent>
           </Card>
-          <Card className={cn(cardClassName, 'h-[300px]')}>
+          <Card className={cn(cardClassName, 'h-[300px] rounded-3xl')}>
             <CardHeader><CardTitle className="text-lg">Throughput vs. Bandwidth</CardTitle></CardHeader>
             <CardContent className="h-[220px] -ml-6">
                 <ResponsiveContainer width="100%" height="100%">
@@ -374,3 +374,5 @@ function SliderField({ control, name, label, min, max, step }: { control: any; n
     />
   );
 }
+
+    
