@@ -4,12 +4,6 @@ export const MODULATION_OPTIONS: readonly [string, ...string[]] = ['QPSK', '16-Q
 
 export const NETWORK_TYPE_OPTIONS: readonly [string, ...string[]] = ['4G', '5G'];
 
-export const AI_GOAL_OPTIONS: { value: AiGoal; label: string }[] = [
-  { value: 'maximize_throughput', label: 'Maximize Throughput' },
-  { value: 'minimize_ber', label: 'Minimize Bit Error Rate' },
-  { value: 'balanced', label: 'Balanced Performance' },
-];
-
 export const SLIDER_DEBOUNCE_TIME = 100;
 
 export const INITIAL_PARAMS = {

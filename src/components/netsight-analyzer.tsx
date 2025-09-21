@@ -8,7 +8,6 @@ import {
   Gauge,
   Loader2,
   Signal,
-  Sparkles,
   TrendingUp,
 } from 'lucide-react';
 import { useEffect, useMemo, useState, useTransition, useRef } from 'react';
@@ -17,7 +16,6 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
-  Legend,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -25,13 +23,11 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { z } from 'zod';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 
 import {
-  AI_GOAL_OPTIONS,
   INITIAL_PARAMS,
   MODULATION_OPTIONS,
   NETWORK_TYPE_OPTIONS,
@@ -41,7 +37,6 @@ import {
   runSimulation,
 } from '@/lib/network-calculations';
 import type {
-  AiGoal,
   ChartDataSet,
   SimulationMetrics,
   SimulationParameters,
@@ -53,7 +48,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -63,7 +57,6 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from '@/components/ui/form';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -76,8 +69,6 @@ import {
 } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/hooks/use-toast';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { suggestSimulationParameters, SuggestSimulationParametersInput } from '@/ai/flows/ai-suggest-simulation-parameters';
 
 const cardClassName =
 'bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-lg transition-all duration-300';
@@ -87,7 +78,6 @@ export default function NetSightAnalyzer() {
   const [metrics, setMetrics] = useState<SimulationMetrics>(() => runSimulation(INITIAL_PARAMS));
   const [chartData, setChartData] = useState<ChartDataSet>(() => generateChartData(INITIAL_PARAMS));
   const [isPending, startTransition] = useTransition();
-  const [isAiPending, startAiTransition] = useTransition();
   const { toast } = useToast();
   const reportRef = useRef<HTMLDivElement>(null);
 
@@ -96,8 +86,6 @@ export default function NetSightAnalyzer() {
     resolver: zodResolver(simulationParametersSchema),
     defaultValues: INITIAL_PARAMS,
   });
-
-  const formValues = form.watch();
 
   useEffect(() => {
     const subscription = form.watch(values => {
@@ -113,32 +101,6 @@ export default function NetSightAnalyzer() {
     });
     return () => subscription.unsubscribe();
   }, [form]);
-
-  const handleAiSuggestion = (goal: AiGoal) => {
-    startAiTransition(async () => {
-      try {
-        const input: SuggestSimulationParametersInput = {
-          networkType: formValues.networkType,
-          goal,
-          userConstraints: 'Prioritize a stable connection.',
-        };
-        const result = await suggestSimulationParameters(input);
-        if (result && result.suggestedParameters) {
-          form.reset(result.suggestedParameters);
-          toast({
-            title: 'AI Suggestions Applied',
-            description: result.reasoning,
-          });
-        }
-      } catch (error) {
-        toast({
-          variant: 'destructive',
-          title: 'AI Suggestion Failed',
-          description: error instanceof Error ? error.message : 'An unknown error occurred.',
-        });
-      }
-    });
-  };
 
     const handleDownloadReport = () => {
     startTransition(async () => {
@@ -288,32 +250,6 @@ export default function NetSightAnalyzer() {
             </Form>
           </CardContent>
         </Card>
-        <Card className={cn(cardClassName, 'bg-opacity-70')}>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="text-primary" />
-              AI-Powered Suggestions
-            </CardTitle>
-            <CardDescription>
-              Let our AI suggest optimal parameters based on your simulation goals.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 gap-2">
-                {AI_GOAL_OPTIONS.map(({ value, label }) => (
-                    <Button
-                        key={value}
-                        variant="outline"
-                        onClick={() => handleAiSuggestion(value)}
-                        disabled={isAiPending}
-                    >
-                        {isAiPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {label}
-                    </Button>
-                ))}
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       <div className="lg:col-span-2 flex flex-col gap-6">
@@ -421,11 +357,8 @@ function SliderField({ control, name, label, min, max, step }: { control: any; n
               step={step}
             />
           </FormControl>
-          <FormMessage />
         </FormItem>
       )}
     />
   );
 }
-
-    

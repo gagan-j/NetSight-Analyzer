@@ -22,5 +22,3 @@ export type ChartDataSet = {
   berVsSnr: { x: number; y: number }[];
   throughputVsBandwidth: { x: number; y: number }[];
 };
-
-export type AiGoal = 'maximize_throughput' | 'minimize_ber' | 'balanced';
