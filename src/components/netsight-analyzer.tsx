@@ -11,7 +11,7 @@ import {
   Sparkles,
   TrendingUp,
 } from 'lucide-react';
-import { useEffect, useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useState, useTransition, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import {
   Area,
@@ -26,6 +26,9 @@ import {
   YAxis,
 } from 'recharts';
 import { z } from 'zod';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+
 
 import { getAiSuggestions } from '@/lib/actions';
 import {
@@ -77,16 +80,16 @@ import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 const cardClassName =
-  'border-primary/20 bg-background/50 backdrop-blur-md transition-all duration-300';
+'bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-lg transition-all duration-300';
 const transparentCardClassName = 'bg-transparent border-transparent shadow-none';
 
 export default function NetSightAnalyzer() {
   const [metrics, setMetrics] = useState<SimulationMetrics>(() => runSimulation(INITIAL_PARAMS));
   const [chartData, setChartData] = useState<ChartDataSet>(() => generateChartData(INITIAL_PARAMS));
   const [isPending, startTransition] = useTransition();
-  const [aiGoal, setAiGoal] = useState<AiGoal>('maximize_throughput');
-  const [aiReasoning, setAiReasoning] = useState<string>('');
   const { toast } = useToast();
+  const reportRef = useRef<HTMLDivElement>(null);
+
 
   const form = useForm<SimulationParameters>({
     resolver: zodResolver(simulationParametersSchema),
@@ -110,58 +113,43 @@ export default function NetSightAnalyzer() {
     return () => subscription.unsubscribe();
   }, [form]);
 
-  const handleAiSuggest = async () => {
+    const handleDownloadReport = () => {
     startTransition(async () => {
-      setAiReasoning('');
-      try {
-        const result = await getAiSuggestions({
-          networkType: form.getValues('networkType'),
-          goal: aiGoal,
-          userConstraints: 'Suggest values for a typical urban macro-cell environment.',
-        });
-        
-        const { suggestedParameters, reasoning } = result;
-        
-        form.setValue('modulation', suggestedParameters.modulation as any, { shouldValidate: true });
-        form.setValue('bandwidth', suggestedParameters.bandwidth, { shouldValidate: true });
-        form.setValue('distance', suggestedParameters.distance, { shouldValidate: true });
-        form.setValue('noiseLevel', suggestedParameters.noiseLevel, { shouldValidate: true });
-        setAiReasoning(reasoning);
-
+      const reportElement = reportRef.current;
+      if (!reportElement) {
         toast({
-          title: 'AI Suggestions Applied',
-          description: 'The simulation parameters have been updated.',
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Could not capture report content.',
         });
+        return;
+      }
 
+      try {
+        const canvas = await html2canvas(reportElement, {
+          backgroundColor: null, // Use transparent background
+          scale: 2,
+        });
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'px',
+          format: [canvas.width, canvas.height],
+        });
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        pdf.save(`netsight_report_${new Date().toISOString()}.pdf`);
+        toast({
+          title: 'Report Downloaded',
+          description: 'Your PDF report has been successfully generated.',
+        });
       } catch (error) {
         toast({
           variant: 'destructive',
-          title: 'AI Suggestion Failed',
+          title: 'PDF Generation Failed',
           description: error instanceof Error ? error.message : 'An unknown error occurred.',
         });
       }
     });
-  };
-
-    const handleDownloadReport = () => {
-    const headers = ['Parameter', 'Value'];
-    const data = [
-      ...Object.entries(form.getValues()),
-      ['--- METRICS ---', ''],
-      ...Object.entries(metrics).map(([key, value]) => [key, typeof value === 'number' ? value.toFixed(4) : value]),
-    ];
-
-    let csvContent = "data:text/csv;charset=utf-8," 
-        + headers.join(",") + "\n"
-        + data.map(e => e.join(",")).join("\n");
-        
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `netsight_report_${new Date().toISOString()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
 
@@ -205,7 +193,8 @@ export default function NetSightAnalyzer() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" ref={reportRef}>
       <div className="lg:col-span-1 flex flex-col gap-6">
         <Card className={transparentCardClassName}>
           <CardHeader>
@@ -272,47 +261,6 @@ export default function NetSightAnalyzer() {
             </Form>
           </CardContent>
         </Card>
-        
-        <Card className={transparentCardClassName}>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="text-primary w-6 h-6" /> AI Parameter Suggestions
-            </CardTitle>
-            <CardDescription>
-              Let AI suggest optimal parameters based on your goal.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-             <Select onValueChange={(v: AiGoal) => setAiGoal(v)} defaultValue={aiGoal}>
-                <SelectTrigger className={cardClassName}>
-                    <SelectValue placeholder="Select an AI goal" />
-                </SelectTrigger>
-                <SelectContent className={cardClassName}>
-                    {AI_GOAL_OPTIONS.map(opt => (
-                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
-            <Button onClick={handleAiSuggest} disabled={isPending} className="w-full">
-              {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-              Suggest Parameters
-            </Button>
-            {aiReasoning && (
-                 <Alert className={cardClassName}>
-                    <AlertTitle>AI Reasoning</AlertTitle>
-                    <AlertDescription className="text-xs">
-                        {aiReasoning}
-                    </AlertDescription>
-                </Alert>
-            )}
-          </CardContent>
-           <CardFooter>
-             <Button variant="outline" onClick={handleDownloadReport} className="w-full">
-                <Download className="mr-2 h-4 w-4" />
-                Download Report (CSV)
-            </Button>
-          </CardFooter>
-        </Card>
       </div>
 
       <div className="lg:col-span-2 flex flex-col gap-6">
@@ -339,15 +287,15 @@ export default function NetSightAnalyzer() {
                <AreaChart data={chartData.signalVsDistance}>
                   <defs>
                     <linearGradient id="colorSignal" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="hsl(150 50% 70%)" stopOpacity={0.6}/>
+                      <stop offset="95%" stopColor="hsl(150 50% 70%)" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
                   <XAxis dataKey="x" stroke="hsl(var(--foreground))" fontSize={12} unit="m" />
                   <YAxis stroke="hsl(var(--foreground))" fontSize={12} unit="dBm" domain={[-120, -30]}/>
                   <Tooltip content={<CustomTooltip />} />
-                  <Area type="monotone" dataKey="y" name="Signal" stroke="hsl(var(--primary))" fill="url(#colorSignal)" />
+                  <Area type="monotone" dataKey="y" name="Signal" stroke="hsl(150 50% 80%)" fill="url(#colorSignal)" />
                 </AreaChart>
             </ResponsiveContainer>
           </CardContent>
@@ -362,7 +310,7 @@ export default function NetSightAnalyzer() {
                   <XAxis dataKey="x" stroke="hsl(var(--foreground))" fontSize={12} unit="dB" />
                   <YAxis type="number" domain={[0, 0.5]} allowDataOverflow={true} stroke="hsl(var(--foreground))" fontSize={12} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Line type="monotone" dataKey="y" name="BER" stroke="hsl(var(--accent))" dot={false} />
+                  <Line type="monotone" dataKey="y" name="BER" stroke="hsl(150 60% 80%)" dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
@@ -374,15 +322,15 @@ export default function NetSightAnalyzer() {
                     <AreaChart data={chartData.throughputVsBandwidth}>
                       <defs>
                         <linearGradient id="colorThroughput" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="hsl(150 60% 70%)" stopOpacity={0.7}/>
+                          <stop offset="95%" stopColor="hsl(150 60% 70%)" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
                       <XAxis dataKey="x" stroke="hsl(var(--foreground))" fontSize={12} unit="MHz" />
                       <YAxis stroke="hsl(var(--foreground))" fontSize={12} unit="Mbps" />
                       <Tooltip content={<CustomTooltip />} />
-                      <Area type="monotone" dataKey="y" name="Throughput" stroke="hsl(var(--accent))" fill="url(#colorThroughput)" />
+                      <Area type="monotone" dataKey="y" name="Throughput" stroke="hsl(150 60% 80%)" fill="url(#colorThroughput)" />
                     </AreaChart>
                 </ResponsiveContainer>
             </CardContent>
@@ -390,6 +338,13 @@ export default function NetSightAnalyzer() {
         </div>
       </div>
     </div>
+    <div className="mt-6 flex justify-center">
+        <Button variant="outline" onClick={handleDownloadReport} disabled={isPending} className="w-full max-w-xs">
+            {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+            Download Report (PDF)
+        </Button>
+    </div>
+  </>
   );
 }
 
