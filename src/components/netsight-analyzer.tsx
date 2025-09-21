@@ -77,7 +77,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 const cardClassName =
-  'border-white/10 bg-white/5 backdrop-blur-lg transition-all duration-300';
+  'border-white/10 bg-white/5 backdrop-blur-sm transition-all duration-300';
 
 export default function NetSightAnalyzer() {
   const [metrics, setMetrics] = useState<SimulationMetrics>(() => runSimulation(INITIAL_PARAMS));
