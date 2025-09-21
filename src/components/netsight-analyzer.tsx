@@ -77,7 +77,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 const cardClassName =
-  'border-white/10 bg-white/5 backdrop-blur-sm transition-all duration-300';
+  'border-white/10 bg-black/10 backdrop-blur-sm transition-all duration-300';
+const transparentCardClassName = 'bg-transparent border-transparent shadow-none';
 
 export default function NetSightAnalyzer() {
   const [metrics, setMetrics] = useState<SimulationMetrics>(() => runSimulation(INITIAL_PARAMS));
@@ -206,7 +207,7 @@ export default function NetSightAnalyzer() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-1 flex flex-col gap-6">
-        <Card className={cardClassName}>
+        <Card className={transparentCardClassName}>
           <CardHeader>
             <CardTitle>Parameter Configuration</CardTitle>
             <CardDescription>
@@ -250,11 +251,11 @@ export default function NetSightAnalyzer() {
                       <FormLabel>Modulation</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className={cardClassName}>
                             <SelectValue placeholder="Select a modulation" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className={cardClassName}>
                           {MODULATION_OPTIONS.map(mod => (
                             <SelectItem key={mod} value={mod}>{mod}</SelectItem>
                           ))}
@@ -272,7 +273,7 @@ export default function NetSightAnalyzer() {
           </CardContent>
         </Card>
         
-        <Card className={cardClassName}>
+        <Card className={transparentCardClassName}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="text-primary w-6 h-6" /> AI Parameter Suggestions
@@ -283,10 +284,10 @@ export default function NetSightAnalyzer() {
           </CardHeader>
           <CardContent className="space-y-4">
              <Select onValueChange={(v: AiGoal) => setAiGoal(v)} defaultValue={aiGoal}>
-                <SelectTrigger>
+                <SelectTrigger className={cardClassName}>
                     <SelectValue placeholder="Select an AI goal" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={cardClassName}>
                     {AI_GOAL_OPTIONS.map(opt => (
                         <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                     ))}
@@ -297,7 +298,7 @@ export default function NetSightAnalyzer() {
               Suggest Parameters
             </Button>
             {aiReasoning && (
-                 <Alert>
+                 <Alert className={cardClassName}>
                     <AlertTitle>AI Reasoning</AlertTitle>
                     <AlertDescription className="text-xs">
                         {aiReasoning}
