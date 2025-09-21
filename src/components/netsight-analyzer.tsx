@@ -7,6 +7,7 @@ import {
   Download,
   Gauge,
   Loader2,
+  ShieldCheck,
   Signal,
   TrendingUp,
 } from 'lucide-react';
@@ -31,6 +32,7 @@ import {
   INITIAL_PARAMS,
   MODULATION_OPTIONS,
   NETWORK_TYPE_OPTIONS,
+  CHANNEL_CODING_OPTIONS
 } from '@/lib/constants';
 import {
   generateChartData,
@@ -115,7 +117,7 @@ export default function NetSightAnalyzer() {
       }
 
       // Temporarily apply a class for PDF export styling
-      reportElement.classList.add('pdf-export-mode');
+      document.body.classList.add('pdf-export-mode');
       
       try {
         const canvas = await html2canvas(reportElement, {
@@ -124,7 +126,7 @@ export default function NetSightAnalyzer() {
         });
         
         // Remove the class after capturing
-        reportElement.classList.remove('pdf-export-mode');
+        document.body.classList.remove('pdf-export-mode');
 
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF({
@@ -140,7 +142,7 @@ export default function NetSightAnalyzer() {
         });
       } catch (error) {
         // Ensure the class is removed even if an error occurs
-        reportElement.classList.remove('pdf-export-mode');
+        document.body.classList.remove('pdf-export-mode');
         toast({
           variant: 'destructive',
           title: 'PDF Generation Failed',
@@ -164,11 +166,17 @@ export default function NetSightAnalyzer() {
       icon: TrendingUp,
       description: 'Estimated data rate.',
     },
-    {
-      title: 'Bit Error Rate (BER)',
+     {
+      title: 'Uncoded BER',
       value: metrics.ber.toExponential(2),
       icon: AlertTriangle,
-      description: 'Rate of data transmission errors.',
+      description: 'Bit errors before error correction.',
+    },
+    {
+      title: 'Coded BER',
+      value: metrics.codedBer.toExponential(2),
+      icon: ShieldCheck,
+      description: 'Bit errors after error correction.',
     },
     {
       title: 'SNR',
@@ -251,6 +259,32 @@ export default function NetSightAnalyzer() {
                     </FormItem>
                   )}
                 />
+
+                 <FormField
+                  control={form.control}
+                  name="channelCoding"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Channel Coding</FormLabel>
+                       <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          className="flex items-center gap-4"
+                        >
+                          {CHANNEL_CODING_OPTIONS.map(type => (
+                            <FormItem key={type} className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value={type} id={type} />
+                              </FormControl>
+                              <Label htmlFor={type}>{type}</Label>
+                            </FormItem>
+                          ))}
+                        </RadioGroup>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
                 
                 <SliderField control={form.control} name="bandwidth" label="Bandwidth (MHz)" min={1} max={100} step={1} />
                 <SliderField control={form.control} name="distance" label="Distance (m)" min={10} max={5000} step={10} />
@@ -262,7 +296,7 @@ export default function NetSightAnalyzer() {
       </div>
 
       <div className="lg:col-span-2 flex flex-col gap-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {metricCards.map(metric => (
                 <Card key={metric.title} className={cardClassName}>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

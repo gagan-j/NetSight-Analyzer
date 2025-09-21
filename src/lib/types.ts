@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const simulationParametersSchema = z.object({
   networkType: z.enum(['4G', '5G']),
   modulation: z.enum(['QPSK', '16-QAM', '64-QAM', '256-QAM']),
+  channelCoding: z.enum(['None', 'Hamming', 'LDPC']),
   bandwidth: z.number().min(1).max(100),
   distance: z.number().min(10).max(5000),
   noiseLevel: z.number().min(-120).max(-30),
@@ -15,6 +16,7 @@ export type SimulationMetrics = {
   snr: number;
   throughput: number;
   ber: number;
+  codedBer: number;
 };
 
 export type ChartDataSet = {

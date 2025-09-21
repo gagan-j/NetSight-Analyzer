@@ -15,6 +15,13 @@ const MODULATION_FACTORS: Record<string, { berFactor: number; efficiency: number
   '256-QAM': { berFactor: 40.5, efficiency: 8 },
 };
 
+// Simplified "coding gain" in dB for different channel coding schemes
+const CODING_GAIN_DB: Record<string, number> = {
+  'None': 0,
+  'Hamming': 2.5, // Hamming codes offer modest gain
+  'LDPC': 6.0,    // Modern LDPC codes offer significant gain
+};
+
 /**
  * Calculates free-space path loss.
  * A simplified model for how signal strength decreases over distance.
@@ -62,10 +69,21 @@ function calculateBer(snr_dB: number, modulation: string): number {
 
 
 /**
+ * Calculates the Coded BER by applying a simplified coding gain.
+ */
+function calculateCodedBer(snr_dB: number, modulation: string, channelCoding: string): number {
+  const codingGain = CODING_GAIN_DB[channelCoding] || 0;
+  // Apply coding gain to the SNR to get an "effective SNR" for the coded system
+  const effectiveSnr = snr_dB + codingGain;
+  // Calculate BER with the improved SNR
+  return calculateBer(effectiveSnr, modulation);
+}
+
+/**
  * Main function to run all calculations based on input parameters.
  */
 export function runSimulation(params: SimulationParameters): SimulationMetrics {
-  const { networkType, distance, noiseLevel, modulation, bandwidth } = params;
+  const { networkType, distance, noiseLevel, modulation, bandwidth, channelCoding } = params;
 
   const frequency = networkType === '5G' ? FREQUENCY_5G_MHZ : FREQUENCY_4G_MHZ;
   const pathLossConstant = networkType === '5G' ? PATH_LOSS_CONSTANT_5G : PATH_LOSS_CONSTANT_4G;
@@ -75,8 +93,9 @@ export function runSimulation(params: SimulationParameters): SimulationMetrics {
   const snr = calculateSnr(signalStrength, noiseLevel);
   const throughput = calculateThroughput(snr, bandwidth, modulation);
   const ber = calculateBer(snr, modulation);
+  const codedBer = calculateCodedBer(snr, modulation, channelCoding);
 
-  return { signalStrength, snr, throughput, ber };
+  return { signalStrength, snr, throughput, ber, codedBer };
 }
 
 /**
