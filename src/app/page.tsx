@@ -4,7 +4,7 @@ import NetSightAnalyzer from '@/components/netsight-analyzer';
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="sticky top-0 z-40 w-full border-b border-b-white/10 bg-white/5 backdrop-blur-sm">
+      <header className="sticky top-0 z-40 w-full border-b border-b-primary/10 bg-green-950/20 backdrop-blur-sm">
         <div className="container mx-auto flex h-16 items-center space-x-4 px-4 sm:justify-between sm:space-x-0">
           <div className="flex gap-3 items-center">
             <Logo className="h-7 w-7 text-primary" />

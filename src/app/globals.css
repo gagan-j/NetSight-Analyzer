@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    --background: 150 50% 98%;
-    --foreground: 150 20% 10%;
+    --background: 150 10% 5%;
+    --foreground: 150 40% 90%;
 
     --card: 150 50% 98%;
     --card-foreground: 150 20% 10%;
@@ -31,11 +31,12 @@
     --border: 150 20% 80%;
     --input: 150 20% 85%;
     --ring: 150 70% 40%;
+    --radius: 1rem;
   }
 
   .dark {
     --background: 150 10% 5%;
-    --foreground: 150 10% 95%;
+    --foreground: 150 40% 90%;
 
     --card: 150 10% 5%;
     --card-foreground: 150 10% 95%;
@@ -58,9 +59,10 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 150 10% 95%;
 
-    --border: 150 10% 15%;
-    --input: 150 10% 15%;
+    --border: 150 20% 25%;
+    --input: 150 20% 25%;
     --ring: 150 71% 45%;
+    --radius: 1rem;
   }
 }
 

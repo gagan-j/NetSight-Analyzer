@@ -77,7 +77,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 const cardClassName =
-  'border-white/10 bg-black/10 backdrop-blur-sm transition-all duration-300';
+  'border-primary/20 bg-green-950/20 backdrop-blur-sm transition-all duration-300 rounded-2xl';
 const transparentCardClassName = 'bg-transparent border-transparent shadow-none';
 
 export default function NetSightAnalyzer() {
@@ -293,7 +293,7 @@ export default function NetSightAnalyzer() {
                     ))}
                 </SelectContent>
             </Select>
-            <Button onClick={handleAiSuggest} disabled={isPending} className="w-full">
+            <Button onClick={handleAiSuggest} disabled={isPending} className="w-full rounded-xl">
               {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
               Suggest Parameters
             </Button>
@@ -307,7 +307,7 @@ export default function NetSightAnalyzer() {
             )}
           </CardContent>
            <CardFooter>
-             <Button variant="outline" onClick={handleDownloadReport} className="w-full">
+             <Button variant="outline" onClick={handleDownloadReport} className="w-full rounded-xl">
                 <Download className="mr-2 h-4 w-4" />
                 Download Report (CSV)
             </Button>
