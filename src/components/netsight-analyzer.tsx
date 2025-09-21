@@ -71,7 +71,7 @@ import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/hooks/use-toast';
 
 const cardClassName =
-'bg-black/30 backdrop-blur-lg border border-white/20 rounded-2xl shadow-lg transition-all duration-300';
+'bg-black/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-lg transition-all duration-300';
 const transparentCardClassName = 'bg-transparent border-transparent shadow-none';
 
 export default function NetSightAnalyzer() {
