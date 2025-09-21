@@ -287,15 +287,15 @@ export default function NetSightAnalyzer() {
                <AreaChart data={chartData.signalVsDistance}>
                   <defs>
                     <linearGradient id="colorSignal" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(95 40% 70%)" stopOpacity={0.6}/>
-                      <stop offset="95%" stopColor="hsl(95 40% 70%)" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="hsl(95 40% 50%)" stopOpacity={0.6}/>
+                      <stop offset="95%" stopColor="hsl(95 40% 50%)" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
                   <XAxis dataKey="x" stroke="hsl(var(--foreground))" fontSize={12} unit="m" />
                   <YAxis stroke="hsl(var(--foreground))" fontSize={12} unit="dBm" domain={[-120, -30]}/>
                   <Tooltip content={<CustomTooltip />} />
-                  <Area type="monotone" dataKey="y" name="Signal" stroke="hsl(95 40% 80%)" fill="url(#colorSignal)" />
+                  <Area type="monotone" dataKey="y" name="Signal" stroke="hsl(95 40% 60%)" fill="url(#colorSignal)" />
                 </AreaChart>
             </ResponsiveContainer>
           </CardContent>
