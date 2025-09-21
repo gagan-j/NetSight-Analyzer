@@ -114,17 +114,17 @@ export default function NetSightAnalyzer() {
         return;
       }
 
-      // Temporarily apply a grayscale filter for the PDF
-      reportElement.style.filter = 'grayscale(100%)';
+      // Temporarily apply a class for PDF export styling
+      reportElement.classList.add('pdf-export-mode');
       
       try {
         const canvas = await html2canvas(reportElement, {
-          backgroundColor: '#ffffff', // Use solid white for B&W
+          backgroundColor: '#ffffff',
           scale: 2,
         });
         
-        // Remove the filter after capturing
-        reportElement.style.filter = '';
+        // Remove the class after capturing
+        reportElement.classList.remove('pdf-export-mode');
 
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF({
@@ -139,8 +139,8 @@ export default function NetSightAnalyzer() {
           description: 'Your black and white PDF report has been successfully generated.',
         });
       } catch (error) {
-        // Ensure the filter is removed even if an error occurs
-        reportElement.style.filter = '';
+        // Ensure the class is removed even if an error occurs
+        reportElement.classList.remove('pdf-export-mode');
         toast({
           variant: 'destructive',
           title: 'PDF Generation Failed',

@@ -88,3 +88,10 @@
     transform: scale(1);
   }
 }
+
+.pdf-export-mode {
+  --foreground: 0 0% 0%;
+  --primary: 0 0% 0%;
+  --muted-foreground: 0 0% 20%;
+  --card-foreground: 0 0% 0%;
+}
